@@ -31,25 +31,24 @@
             var longUrl = document.getElementById('longUrl').value;
             
             if(!longUrl.startsWith('http')) {
-                alert('請輸入正確的長網址（需包含 http 或 https）！');
+                alert('請輸入正確的長網址！');
                 return;
             }
             
-            // 替換成你的資料庫倉庫地址
+            // 倉庫地址
             var githubRepo = "https://github.com/joy40217/url-shortener/issues/new";
             
-            // 必須使用 encodeURIComponent，否則網址內的特殊符號會讓 GitHub 判斷錯誤
+            // 進行 URL 編碼
             var encodedTitle = encodeURIComponent(urlTitle);
             var encodedBody = encodeURIComponent(longUrl);
-            var encodedLabels = encodeURIComponent("URL"); // 自動加上標籤
             
-            // 將所有參數串接起來
-            var finalLink = `${githubRepo}?title=${encodedTitle}&body=${encodedBody}&labels=${encodedLabels}`;
+            // 產生網址
+            var finalLink = `${githubRepo}?template=short-url.md&title=${encodedTitle}&body=${encodedBody}`;
             
             document.getElementById('result').innerHTML = `
-                <p>已準備就緒，請點擊下方按鈕前往 GitHub 送出：</p>
-                <a href="${finalLink}" target="_blank" style="display:inline-block; padding:10px 20px; background:#0366d6; color:white; text-decoration:none; border-radius:6px; font-weight:bold;">
-                   👉 前往 GitHub 建立
+                <p>請點擊下方按鈕前往 GitHub 送出：</p>
+                <a href="${finalLink}" target="_blank" style="display:inline-block; padding:10px 20px; background:#2ea44f; color:white; text-decoration:none; border-radius:6px; font-weight:bold;">
+                   👉 前往 GitHub 建立 
                 </a>
             `;
         }
