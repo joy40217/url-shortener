@@ -35,11 +35,44 @@
           "/" +
           location.pathname.split("/")[PATH_SEGMENTS_TO_SKIP];
 
+        // 如果網址沒有帶 Issue 編號，直接跳回首頁
+        if (!issueNumber) {
+           location.replace(homepage);
+           return;
+        }
+
         var xhr = new XMLHttpRequest();
 
         xhr.onload = function () {
           try {
             var payload = JSON.parse(xhr.response);
+
+            // 檢查 Issue 是否被關閉 (Closed)
+            if (payload.state === "closed") {
+              document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; font-family:sans-serif; color:#333;'>這個短網址已經失效囉！</h1>";
+              return; // 停止執行後續轉址
+            }
+
+            // 從 Issue 內文 (Body) 中撈出真正的長網址
+            if (payload.body) {
+              var urlRegex = /(https?:\/\/[^\s]+)/g;
+              var matches = payload.body.match(urlRegex);
+              
+              if (matches && matches.length > 0) {
+                var targetBodyUrl = matches[0];
+                
+                // 驗證內文抓到的網址格式，並避免遞迴跳轉自己
+                var bodyUrlObj = document.createElement("a");
+                bodyUrlObj.setAttribute("href", targetBodyUrl);
+                
+                if (isUrl(targetBodyUrl) && bodyUrlObj.hostname !== location.hostname) {
+                  location.replace(targetBodyUrl);
+                  return; // 成功從內文轉址，結束函式
+                }
+              }
+            }
+
+            // 向下相容防呆 (如果內文沒有網址，改讀取標題 title)
             var message = payload.message;
             var title = payload.title;
 
@@ -67,6 +100,7 @@
         xhr.onerror = function () {
           location.replace(homepage);
         };
+        
         xhr.open("GET", GITHUB_ISSUES_LINK + issueNumber);
         xhr.send();
       }
